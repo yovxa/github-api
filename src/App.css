@@ -1,38 +1,93 @@
-.App {
-  text-align: center;
+body {
+  background-color: #0d0221;
+  font-family: sans-serif;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
+@media screen and (max-width: 1000px) {
+  .profile-name {
+    font-size: 18px;
   }
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+@media screen and (max-width: 800px) {
+  .profile-card {
+    padding: 20px 15px;
+  }
+
+  .code-card {
+    padding: 20px 15px;
+  }
+
+  .profile-name {
+    font-size: 16px;
+  }
+}
+
+.title {
+  color: white;
+  text-align: center;
+  font-size: 40px;
+  font-weight: bold;
+}
+
+.p {
+  color: #ffffff;
+}
+
+.flex {
   display: flex;
-  flex-direction: column;
+  justify-content: center;
+}
+
+.btn {
+  height: 45px;
+  width: 100px;
+}
+
+.profile-container {
+  display: flex;
   align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  flex-wrap: wrap;
+  padding-top: 30px;
+  margin: 0 30px;
 }
 
-.App-link {
-  color: #61dafb;
+.profile-icon {
+  height: 100px;
+  width: 100px;
+  object-fit: cover;
+  border-radius: 50%;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.profile-name {
+  font-size: 20px;
+  font-weight: bold;
+  padding: 10px;
+}
+
+.profile-position {
+  font-size: 14px;
+  color: #ffffff;
+}
+
+.navbar {
+  padding: 30px;
+}
+
+.container {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.data {
+  cursor: pointer;
+  transition: 0.3s;
+  padding: 10px;
+}
+
+.data:hover {
+  transform: scale(1.1);
+  text-shadow: 2px 2px 8px #ccc;
 }
