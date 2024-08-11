@@ -42,7 +42,6 @@ const FileCard = styled(CardContent)(() => ({
 
 const NavBar = styled(AppBar)(() => ({
   color: common["white"],
-
   backgroundColor: "#0d0221",
 }));
 
@@ -58,13 +57,21 @@ function RepositoriesPage() {
   };
 
   const [repoContents, setRepoContents] = useState([]);
+  const [currentDirContents, setCurrentDirContents] = useState([]);
   const [fileContent, setFileContent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [currentPath, setCurrentPath] = useState("");
 
   useEffect(() => {
     if (owner && repo) {
-      fetch(`https://api.github.com/repos/${owner}/${repo}/contents`, {})
+      const token = process.env.REACT_APP_API;
+
+      fetch(`https://api.github.com/repos/${owner}/${repo}/contents`, {
+        headers: {
+          Authorization: `token ${token}`,
+        },
+      })
         .then((response) => {
           if (!response.ok) {
             throw new Error("Network response was not ok");
@@ -99,8 +106,63 @@ function RepositoriesPage() {
         .catch((error) => {
           setError(error);
         });
-    } else {
-      setFileContent(null);
+    } else if (file.type === "dir") {
+      const token = process.env.REACT_APP_API;
+
+      fetch(file.url, {
+        headers: {
+          Authorization: `token ${token}`,
+        },
+      })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("Network response was not ok");
+          }
+          return response.json();
+        })
+        .then((data) => {
+          setCurrentDirContents(data);
+          setCurrentPath(file.path);
+        })
+        .catch((error) => {
+          setError(error);
+        });
+    }
+  };
+
+  const handleBackClick = () => {
+    if (currentPath) {
+      const segments = currentPath.split("/");
+      segments.pop();
+      const newPath = segments.join("/");
+      if (newPath) {
+        const token = process.env.REACT_APP_API;
+
+        fetch(
+          `https://api.github.com/repos/${owner}/${repo}/contents${newPath}`,
+          {
+            headers: {
+              Authorization: `token ${token}`,
+            },
+          }
+        )
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error("Network response was not ok");
+            }
+            return response.json();
+          })
+          .then((data) => {
+            setCurrentDirContents(data);
+            setCurrentPath(newPath);
+          })
+          .catch((error) => {
+            setError(error);
+          });
+      } else {
+        setCurrentDirContents(repoContents);
+        setCurrentPath("");
+      }
     }
   };
 
@@ -125,25 +187,54 @@ function RepositoriesPage() {
       </div>
       <div className="container">
         <RepoCard variant="outlined">
-          <CardHeader title="Repository Contents" />
+          <CardHeader
+            title="Repository Contents"
+            titleTypographyProps={{fontSize:"20px"}}
+            action={
+              currentPath && (
+                <IconButton
+                  size="small"
+                  color="inherit"
+                  onClick={handleBackClick}
+                >
+                  Back
+                </IconButton>
+              )
+            }
+          />
           <CardContent>
             {loading && <p>Loading...</p>}
             {error && <p>Error: {error.message}</p>}
             <ul>
-              {repoContents.map((item) => (
-                <li
-                  className="data"
-                  key={item.sha}
-                  onClick={() => handleFileClick(item)}
-                >
-                  {item.type === "dir" ? (
-                    <strong>Directory: </strong>
-                  ) : (
-                    <strong>File: </strong>
-                  )}
-                  {item.name}
-                </li>
-              ))}
+              {currentDirContents.length
+                ? currentDirContents.map((item) => (
+                    <li
+                      className="data"
+                      key={item.sha}
+                      onClick={() => handleFileClick(item)}
+                    >
+                      {item.type === "dir" ? (
+                        <strong>Directory: </strong>
+                      ) : (
+                        <strong>File: </strong>
+                      )}
+                      {item.name}
+                    </li>
+                  ))
+                : repoContents.map((item) => (
+                    <li
+                      className="data"
+                      key={item.sha}
+                      onClick={() => handleFileClick(item)}
+                    >
+                      {item.type === "dir" ? (
+                        <strong>Directory: </strong>
+                      ) : (
+                        <strong>File: </strong>
+                      )}
+                      {item.name}
+                    </li>
+                  ))}
             </ul>
           </CardContent>
         </RepoCard>

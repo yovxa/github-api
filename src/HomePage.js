@@ -69,7 +69,6 @@ function HomePage() {
       setLoading(true);
       setError(null);
       const token = process.env.REACT_APP_API;
-      console.log(token);
       fetch(`https://api.github.com/users/${search}/repos`, {
         headers: {
           Authorization: `token ${token}`,
