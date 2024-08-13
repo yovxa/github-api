@@ -14,9 +14,25 @@ import { common } from "@mui/material/colors";
 import { GitHub } from "@mui/icons-material";
 
 const RepoCard = styled(Card)(() => ({
-  width: "300px",
+  width: "400px",
+  height: "590px",
   backgroundColor: "#35284f",
   color: "white",
+  overflowX: "scroll",
+
+  overflowY: "scroll",
+
+  "&::-webkit-scrollbar": {
+    scrollbarWidth: "thin",
+  },
+  "&::-webkit-scrollbar-track": {
+    boxShadow: "inset 0 0 6px #271150",
+    webkitBoxShadow: "inset 0 0 #0d0221",
+  },
+  "&::-webkit-scrollbar-thumb": {
+    backgroundColor: "#583e89",
+    outline: "1px solid #422e68",
+  },
 }));
 
 const FileCard = styled(CardContent)(() => ({
@@ -66,7 +82,7 @@ function RepositoriesPage() {
   useEffect(() => {
     if (owner && repo) {
       const token = process.env.REACT_APP_API;
-  
+
       fetch(`https://api.github.com/repos/${owner}/${repo}/contents`, {
         headers: {
           Authorization: `token ${token}`,
@@ -91,9 +107,6 @@ function RepositoriesPage() {
       setLoading(false);
     }
   }, [owner, repo]);
-  
-  
-  
 
   const handleFileClick = (file) => {
     if (file.type === "file") {
@@ -127,7 +140,7 @@ function RepositoriesPage() {
         .then((data) => {
           setCurrentDirContents(data);
           setCurrentPath(file.path);
-          setFileContent(null); 
+          setFileContent(null);
         })
         .catch((error) => {
           setError(error);
@@ -160,7 +173,7 @@ function RepositoriesPage() {
           .then((data) => {
             setCurrentDirContents(data);
             setCurrentPath(newPath);
-            setFileContent(null); 
+            setFileContent(null);
           })
           .catch((error) => {
             setError(error);
@@ -168,7 +181,7 @@ function RepositoriesPage() {
       } else {
         setCurrentDirContents(repoContents);
         setCurrentPath("");
-        setFileContent(null); 
+        setFileContent(null);
       }
     }
   };
