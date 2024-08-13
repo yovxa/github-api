@@ -65,23 +65,54 @@ function HomePage() {
   const navigate = useNavigate();
 
   const handleSearch = () => {
-    if (search.trim()) {
-      setLoading(true);
-      setError(null);
-      const token = process.env.REACT_APP_API;
-      fetch(`https://api.github.com/users/${search}/repos`, {
+    if (!search.trim()) {
+      setError({ message: "Please enter a username or repository name" });
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    const token = process.env.REACT_APP_API;
+
+    if (search.includes("/")) {
+      const [owner, repo] = search.split("/");
+      fetch(`https://api.github.com/repos/${owner}/${repo}`, {
         headers: {
           Authorization: `token ${token}`,
         },
       })
         .then((response) => {
           if (!response.ok) {
-            throw new Error("Network response was not ok");
+            throw new Error("Not Found!");
           }
           return response.json();
         })
         .then((data) => {
-          setRepoData(data);
+          setRepoData([data]);
+          setLoading(false);
+        })
+        .catch((error) => {
+          setError(error);
+          setLoading(false);
+        });
+    } else {
+      fetch(
+        `https://api.github.com/search/repositories?q=${search}+in:name,description`,
+        {
+          headers: {
+            Authorization: `token ${token}`,
+          },
+        }
+      )
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("Not Found!");
+          }
+          return response.json();
+        })
+        .then((data) => {
+          setRepoData(data.items);
           setLoading(false);
         })
         .catch((error) => {
@@ -91,8 +122,8 @@ function HomePage() {
     }
   };
 
-  const handleViewRepo = (repoName) => {
-    navigate(`/repositories?owner=${search}&repo=${repoName}`);
+  const handleViewRepo = (repoOwner, repoName) => {
+    navigate(`/repositories?owner=${repoOwner}&repo=${repoName}`);
   };
 
   return (
@@ -128,7 +159,7 @@ function HomePage() {
       </div>
 
       {loading && <p className="p">Loading...</p>}
-      {error && <p className="p">Error: {error.message}</p>}
+      {error && <p className="p">{error.message}</p>}
       <div className="profile-container">
         {repoData.map((repo) => (
           <ProfileCard key={repo.id}>
@@ -143,7 +174,7 @@ function HomePage() {
             <SearchButton
               variant="contained"
               size="large"
-              onClick={() => handleViewRepo(repo.name)}
+              onClick={() => handleViewRepo(repo.owner.login, repo.name)}
             >
               View Repository
             </SearchButton>

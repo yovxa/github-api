@@ -66,7 +66,7 @@ function RepositoriesPage() {
   useEffect(() => {
     if (owner && repo) {
       const token = process.env.REACT_APP_API;
-
+  
       fetch(`https://api.github.com/repos/${owner}/${repo}/contents`, {
         headers: {
           Authorization: `token ${token}`,
@@ -80,6 +80,7 @@ function RepositoriesPage() {
         })
         .then((data) => {
           setRepoContents(data);
+          setCurrentDirContents(data);
           setLoading(false);
         })
         .catch((error) => {
@@ -90,6 +91,9 @@ function RepositoriesPage() {
       setLoading(false);
     }
   }, [owner, repo]);
+  
+  
+  
 
   const handleFileClick = (file) => {
     if (file.type === "file") {
@@ -123,6 +127,7 @@ function RepositoriesPage() {
         .then((data) => {
           setCurrentDirContents(data);
           setCurrentPath(file.path);
+          setFileContent(null); 
         })
         .catch((error) => {
           setError(error);
@@ -139,7 +144,7 @@ function RepositoriesPage() {
         const token = process.env.REACT_APP_API;
 
         fetch(
-          `https://api.github.com/repos/${owner}/${repo}/contents${newPath}`,
+          `https://api.github.com/repos/${owner}/${repo}/contents/${newPath}`,
           {
             headers: {
               Authorization: `token ${token}`,
@@ -155,6 +160,7 @@ function RepositoriesPage() {
           .then((data) => {
             setCurrentDirContents(data);
             setCurrentPath(newPath);
+            setFileContent(null); 
           })
           .catch((error) => {
             setError(error);
@@ -162,6 +168,7 @@ function RepositoriesPage() {
       } else {
         setCurrentDirContents(repoContents);
         setCurrentPath("");
+        setFileContent(null); 
       }
     }
   };
@@ -189,7 +196,7 @@ function RepositoriesPage() {
         <RepoCard variant="outlined">
           <CardHeader
             title="Repository Contents"
-            titleTypographyProps={{fontSize:"20px"}}
+            titleTypographyProps={{ fontSize: "20px" }}
             action={
               currentPath && (
                 <IconButton
@@ -206,41 +213,28 @@ function RepositoriesPage() {
             {loading && <p>Loading...</p>}
             {error && <p>Error: {error.message}</p>}
             <ul>
-              {currentDirContents.length
-                ? currentDirContents.map((item) => (
-                    <li
-                      className="data"
-                      key={item.sha}
-                      onClick={() => handleFileClick(item)}
-                    >
-                      {item.type === "dir" ? (
-                        <strong>Directory: </strong>
-                      ) : (
-                        <strong>File: </strong>
-                      )}
-                      {item.name}
-                    </li>
-                  ))
-                : repoContents.map((item) => (
-                    <li
-                      className="data"
-                      key={item.sha}
-                      onClick={() => handleFileClick(item)}
-                    >
-                      {item.type === "dir" ? (
-                        <strong>Directory: </strong>
-                      ) : (
-                        <strong>File: </strong>
-                      )}
-                      {item.name}
-                    </li>
-                  ))}
+              {currentDirContents.map((item) => (
+                <li
+                  className="data"
+                  key={item.sha}
+                  onClick={() => handleFileClick(item)}
+                >
+                  {item.type === "dir" ? (
+                    <strong>Directory: </strong>
+                  ) : (
+                    <strong>File: </strong>
+                  )}
+                  {item.name}
+                </li>
+              ))}
             </ul>
           </CardContent>
         </RepoCard>
         <FileCard>
           <CardHeader title="File Content" />
-          <CardContent>{fileContent && <pre>{fileContent}</pre>}</CardContent>
+          <CardContent>
+            {fileContent ? <pre>{fileContent}</pre> : <p>Select a file.</p>}
+          </CardContent>
         </FileCard>
       </div>
     </>
